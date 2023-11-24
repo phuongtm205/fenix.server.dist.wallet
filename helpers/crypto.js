@@ -61,7 +61,6 @@ class CryptoHelper {
     static generateKeypairFromSecretPhrase(secretPhrase, accountIndex) {
         if (!secretPhrase || (!accountIndex && accountIndex != 0))
             return;
-        console.log(secretPhrase);
         const seed = (0, bip39_1.mnemonicToSeedSync)(secretPhrase, "");
         const path = `m/44'/501'/${accountIndex}'/0'`;
         return web3_js_1.Keypair.fromSeed((0, ed25519_hd_key_1.derivePath)(path, seed.toString("hex")).key);

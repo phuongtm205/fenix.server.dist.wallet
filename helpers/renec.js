@@ -5,6 +5,7 @@ const web3_js_1 = require("@solana/web3.js");
 const configs_1 = require("../configs");
 const crypto_1 = require("./crypto");
 const spl_token_1 = require("@solana/spl-token");
+const common_1 = require("../common");
 class RenecHelper {
     static getConnection() {
         return new web3_js_1.Connection(configs_1.Env.RENEC_CONNECTION, 'confirmed');
@@ -48,7 +49,7 @@ class RenecHelper {
             return tokenAccount;
         }
         catch (err) {
-            console.log(err);
+            common_1.Logger.error(err);
             return tokenAccount;
         }
     }

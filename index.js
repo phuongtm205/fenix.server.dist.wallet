@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Config Env
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-console.log(process.env.PORT);
 // Load database models
 require("./bin/model");
 // Start server

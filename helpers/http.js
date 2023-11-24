@@ -89,7 +89,13 @@ class HttpHelper {
             return lodash_1.default.get(result, 'data', { success: false });
         }
         catch (err) {
+            common_1.Logger.error(err);
             if (err instanceof axios_1.AxiosError) {
+                if (err.code == 'ECONNREFUSED') {
+                    return {
+                        success: false,
+                    };
+                }
                 return err.response.data;
             }
             else if (err instanceof Error) {

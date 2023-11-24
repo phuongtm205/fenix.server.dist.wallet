@@ -14,4 +14,7 @@ exports.Env = {
     FENIX_SECRET_KEY: process.env.FENIX_SECRET_KEY || '',
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || '',
     ENCRYPTION_IV: process.env.ENCRYPTION_IV || '',
+    MIN_RENEC_BALANCE: process.env.MIN_RENEC_BALANCE || '0.005',
+    MIN_PPL_BALANCE: process.env.MIN_PPL_BALANCE || '0',
+    STATISTIC_HOST: process.env.STATISTIC_HOST || 'http://localhost:3030',
 };

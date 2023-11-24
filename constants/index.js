@@ -21,3 +21,4 @@ __exportStar(require("./http"), exports);
 __exportStar(require("./account"), exports);
 __exportStar(require("./crypto"), exports);
 __exportStar(require("./token"), exports);
+__exportStar(require("./transaction"), exports);

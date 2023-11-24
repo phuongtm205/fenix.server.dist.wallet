@@ -44,7 +44,6 @@ class App {
         });
     }
     static run() {
-        console.log(process.env.PORT);
         this.app.listen(configs_1.Env.PORT, () => {
             common_1.Logger.info(`Server is running on port ${configs_1.Env.PORT}.`);
         }).on('error', (err) => {
