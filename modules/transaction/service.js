@@ -6,13 +6,13 @@ const configs_1 = require("../../configs");
 const constants_1 = require("../../constants");
 const helpers_1 = require("../../helpers");
 class StatisticService extends base_1.Service {
-    async startBuy(currentUser, itemId) {
+    async startBuy(currentUser, promotionPackage) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
             currentUser,
             data: {
                 type: constants_1.TRANSACTION_TYPE.Buy,
-                itemId,
+                promotionPackage,
             },
         });
         if (res.success)
@@ -65,9 +65,9 @@ class StatisticService extends base_1.Service {
             return res.data.id;
         this.throwError(res);
     }
-    async countBoughtItem(currentUser, itemId) {
+    async countNumOfBoughtPackages(currentUser, packageId, promotionId, campaignId) {
         const res = await helpers_1.HttpHelper.get({
-            url: `${configs_1.Env.STATISTIC_HOST}/transactions/count/${itemId}`,
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions/packages/count?packageId=${packageId}&promotionId=${promotionId}&campaignId=${campaignId}`,
             currentUser,
         });
         if (res.success)

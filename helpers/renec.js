@@ -75,7 +75,7 @@ class RenecHelper {
             toPubkey: toPubkey,
             lamports: amount * web3_js_1.LAMPORTS_PER_SOL,
         }));
-        await (0, web3_js_1.sendAndConfirmTransaction)(connection, transferTransaction, [fromKeypair]);
+        return await (0, web3_js_1.sendAndConfirmTransaction)(connection, transferTransaction, [fromKeypair]);
     }
 }
 exports.RenecHelper = RenecHelper;
