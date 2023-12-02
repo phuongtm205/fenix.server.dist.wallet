@@ -57,11 +57,12 @@ class WalletService extends base_1.Service {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
-            const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
+            const fenixPubkey = helpers_1.RenecHelper.getFenixPublicKey();
+            const shopKeypair = helpers_1.RenecHelper.getShopKeypair();
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             // Check balance
             const userRenecBalance = await helpers_1.RenecHelper.getBalance(account.address);
-            if (userRenecBalance.amount < pkg.price.renec + Number.parseFloat(configs_1.Env.MIN_RENEC_BALANCE)) {
+            if (userRenecBalance.amount < pkg.price.renec + configs_1.Env.MIN_RENEC_BALANCE) {
                 this.throwError(constants_1.ERROR.Account.InsufficientBalance);
             }
             // Check stock
@@ -72,7 +73,7 @@ class WalletService extends base_1.Service {
                 }
             }
             const transTokens = [];
-            const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixKeypair.publicKey, pkg.price.renec);
+            const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixPubkey, pkg.price.renec);
             transTokens.push({
                 signature,
                 code: constants_1.TOKEN_CODE.Renec,
@@ -83,7 +84,7 @@ class WalletService extends base_1.Service {
             const tokens = await service_1.default.getTokens();
             if (pkg.tokens.ppl > 0) {
                 const mint = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl).mint;
-                const signature = await helpers_1.RenecHelper.transferToken(fenixKeypair, userKeypair.publicKey, mint, pkg.tokens.ppl);
+                const signature = await helpers_1.RenecHelper.transferToken(shopKeypair, userKeypair.publicKey, mint, pkg.tokens.ppl);
                 transTokens.push({
                     signature,
                     code: constants_1.TOKEN_CODE.Ppl,
@@ -115,11 +116,12 @@ class WalletService extends base_1.Service {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
-            const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
+            const fenixPubkey = helpers_1.RenecHelper.getFenixPublicKey();
+            const dailyBonusKeypair = helpers_1.RenecHelper.getDailyBonusKeypair();
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             const transTokens = [];
             if (bonus.price && bonus.price.renec > 0) {
-                const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixKeypair.publicKey, bonus.price.renec);
+                const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixPubkey, bonus.price.renec);
                 transTokens.push({
                     signature,
                     code: constants_1.TOKEN_CODE.Renec,
@@ -131,7 +133,7 @@ class WalletService extends base_1.Service {
             const tokens = await service_1.default.getTokens();
             if (bonus.tokens.ppl > 0) {
                 const mint = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl).mint;
-                const signature = await helpers_1.RenecHelper.transferToken(fenixKeypair, userKeypair.publicKey, mint, bonus.tokens.ppl);
+                const signature = await helpers_1.RenecHelper.transferToken(dailyBonusKeypair, userKeypair.publicKey, mint, bonus.tokens.ppl);
                 transTokens.push({
                     signature,
                     code: constants_1.TOKEN_CODE.Ppl,
@@ -141,7 +143,7 @@ class WalletService extends base_1.Service {
                 });
             }
             if (bonus.tokens.renec > 0) {
-                const signature = await helpers_1.RenecHelper.transferRenec(fenixKeypair, userKeypair.publicKey, bonus.tokens.renec);
+                const signature = await helpers_1.RenecHelper.transferRenec(dailyBonusKeypair, userKeypair.publicKey, bonus.tokens.renec);
                 transTokens.push({
                     signature,
                     code: constants_1.TOKEN_CODE.Renec,
@@ -175,36 +177,20 @@ class WalletService extends base_1.Service {
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             const toPubKey = new web3_js_1.PublicKey(body.address);
-            let signature;
+            const transTokens = [];
             if (body.token == constants_1.TOKEN_CODE.Renec) {
-                const minBalance = Number.parseFloat(body.amount.toString()) + Number.parseFloat(configs_1.Env.MIN_RENEC_BALANCE);
-                const renecBalance = await helpers_1.RenecHelper.getBalance(account.address);
-                if (renecBalance.amount < minBalance) {
-                    this.throwError(constants_1.ERROR.Account.InsufficientBalance);
-                }
-                signature = await helpers_1.RenecHelper.transferRenec(userKeypair, toPubKey, body.amount);
+                const transToken = await this.withdrawRenec(body.amount, userKeypair, toPubKey);
+                transTokens.push(transToken);
             }
             const tokens = await service_1.default.getTokens();
             if (body.token == constants_1.TOKEN_CODE.Ppl) {
                 const token = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl);
-                if (!token)
-                    this.throwError(constants_1.ERROR.Wallet.TokenNotFound);
-                const minBalance = Number.parseFloat(body.amount.toString()) + Number.parseFloat(configs_1.Env.MIN_PPL_BALANCE);
-                const tokenBalance = await helpers_1.RenecHelper.getTokenAccount(account.address, token);
-                if (tokenBalance.amount < minBalance) {
-                    this.throwError(constants_1.ERROR.Account.InsufficientBalance);
-                }
-                signature = await helpers_1.RenecHelper.transferToken(userKeypair, toPubKey, token.mint, body.amount);
+                const trans1 = await this.addMinimumRenec(userKeypair.publicKey);
+                if (trans1)
+                    transTokens.push(trans1);
+                const trans2 = await this.withdrawPpl(body.amount, token, userKeypair, toPubKey);
+                transTokens.push(trans2);
             }
-            const transTokens = [
-                {
-                    signature,
-                    code: body.token,
-                    amount: -body.amount,
-                    beforeBalance: 0,
-                    afterBalance: 0,
-                },
-            ];
             await service_3.default.updateSuccess(currentUser, transId, transTokens);
         }
         catch (err) {
@@ -219,6 +205,61 @@ class WalletService extends base_1.Service {
             }
             throw err;
         }
+    }
+    async withdrawRenec(amount, userKeypair, toPubKey) {
+        if (Number.parseFloat(amount.toString()) < configs_1.Env.MIN_RENEC_WITHDRAW) {
+            const message = constants_1.ERROR.Account.InsufficientMinimumRenec.message + configs_1.Env.MIN_RENEC_WITHDRAW + " RENEC.";
+            this.throwError(constants_1.ERROR.Account.InsufficientMinimumRenec, message);
+        }
+        const minBalance = Number.parseFloat(amount.toString()) + configs_1.Env.MIN_RENEC_BALANCE;
+        const renecBalance = await helpers_1.RenecHelper.getBalance(userKeypair.publicKey);
+        if (renecBalance.amount < minBalance) {
+            this.throwError(constants_1.ERROR.Account.InsufficientBalance);
+        }
+        const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, toPubKey, amount);
+        return {
+            signature,
+            code: constants_1.TOKEN_CODE.Renec,
+            amount: -amount,
+            beforeBalance: 0,
+            afterBalance: 0,
+        };
+    }
+    async withdrawPpl(amount, token, userKeypair, toPubKey) {
+        if (!token)
+            this.throwError(constants_1.ERROR.Wallet.TokenNotFound);
+        console.log(configs_1.Env.MIN_PPL_WITHDRAW);
+        if (Number.parseFloat(amount.toString()) < configs_1.Env.MIN_PPL_WITHDRAW) {
+            const message = constants_1.ERROR.Account.InsufficientMinimumPpl.message + configs_1.Env.MIN_PPL_WITHDRAW + " PPL.";
+            this.throwError(constants_1.ERROR.Account.InsufficientMinimumPpl, message);
+        }
+        const minBalance = Number.parseFloat(amount.toString()) + configs_1.Env.MIN_PPL_BALANCE;
+        const tokenBalance = await helpers_1.RenecHelper.getTokenAccount(userKeypair.publicKey, token);
+        if (tokenBalance.amount < minBalance) {
+            this.throwError(constants_1.ERROR.Account.InsufficientBalance);
+        }
+        const signature = await helpers_1.RenecHelper.transferToken(userKeypair, toPubKey, token.mint, amount);
+        return {
+            signature,
+            code: constants_1.TOKEN_CODE.Ppl,
+            amount: -amount,
+            beforeBalance: 0,
+            afterBalance: 0,
+        };
+    }
+    async addMinimumRenec(toPubKey) {
+        const renec = await helpers_1.RenecHelper.getBalance(toPubKey);
+        if (renec.amount > 0)
+            return;
+        const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
+        const signature = await helpers_1.RenecHelper.transferRenec(fenixKeypair, toPubKey, constants_1.MIN_RENEC);
+        return {
+            signature,
+            code: constants_1.TOKEN_CODE.Renec,
+            amount: constants_1.MIN_RENEC,
+            beforeBalance: 0,
+            afterBalance: 0,
+        };
     }
 }
 exports.WalletService = WalletService;

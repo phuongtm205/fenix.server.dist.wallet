@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InsufficientBalance = exports.AccountNotFound = exports.CannotCreateAccountOnRenecNetwork = exports.AccountCreated = exports.GameNotFound = exports.GameEmpty = void 0;
+exports.InsufficientMinimumPpl = exports.InsufficientMinimumRenec = exports.InsufficientBalance = exports.AccountNotFound = exports.CannotCreateAccountOnRenecNetwork = exports.AccountCreated = exports.GameNotFound = exports.GameEmpty = void 0;
 const http_status_codes_1 = require("http-status-codes");
 exports.GameEmpty = {
     code: 100,
@@ -31,4 +31,14 @@ exports.InsufficientBalance = {
     code: 105,
     status: http_status_codes_1.StatusCodes.BAD_REQUEST,
     message: 'Balance is insufficient',
+};
+exports.InsufficientMinimumRenec = {
+    code: 106,
+    status: http_status_codes_1.StatusCodes.BAD_REQUEST,
+    message: 'The amount to withdraw must be greater than or equals to ',
+};
+exports.InsufficientMinimumPpl = {
+    code: 107,
+    status: http_status_codes_1.StatusCodes.BAD_REQUEST,
+    message: 'The amount to withdraw must be greater than or equals to ',
 };

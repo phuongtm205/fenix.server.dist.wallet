@@ -5,11 +5,11 @@ const common_1 = require("../common");
 class RequestBuilder {
     static extends() {
         return (req, res, next) => {
-            res.success = function (data = {}) {
+            res.success = (data = {}) => {
                 res.json({ success: true, data });
             };
-            res.error = function (error = new common_1.FenixError()) {
-                next(new common_1.FenixError(error));
+            res.error = (error = new common_1.FenixError()) => {
+                next(error);
             };
             req.currentUser = () => {
                 return { id: req.headers.user_id };

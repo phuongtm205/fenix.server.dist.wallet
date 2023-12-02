@@ -10,8 +10,17 @@ class RenecHelper {
     static getConnection() {
         return new web3_js_1.Connection(configs_1.Env.RENEC_CONNECTION, 'confirmed');
     }
+    static getShopKeypair() {
+        return crypto_1.CryptoHelper.generateKeypairFromSecretKey(configs_1.Env.SHOP_SECRET_KEY);
+    }
+    static getDailyBonusKeypair() {
+        return crypto_1.CryptoHelper.generateKeypairFromSecretKey(configs_1.Env.DAILY_BONUS_SECRET_KEY);
+    }
     static getFenixKeypair() {
         return crypto_1.CryptoHelper.generateKeypairFromSecretKey(configs_1.Env.FENIX_SECRET_KEY);
+    }
+    static getFenixPublicKey() {
+        return new web3_js_1.PublicKey(configs_1.Env.FENIX_PUBLIC_KEY);
     }
     static async createAccount(secretPhrase, accountIndex) {
         const fromKeypair = this.getFenixKeypair();

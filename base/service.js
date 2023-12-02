@@ -3,8 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseService = exports.Service = void 0;
 const common_1 = require("../common");
 class Service {
-    throwError(error) {
-        throw new common_1.FenixError(error);
+    throwError(error, message, code, status) {
+        throw new common_1.FenixError({
+            code: code || error.code,
+            status: status || error.status,
+            message: message || error.message,
+        });
     }
 }
 exports.Service = Service;
