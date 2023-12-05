@@ -25,6 +25,15 @@ class WalletController extends base_1.BaseController {
             res.error(err);
         }
     }
+    async getPplBalance(req, res) {
+        try {
+            const account = await service_1.default.getPplBalance(req.currentUser(), req.game());
+            res.success(account);
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
     async buy(req, res) {
         try {
             await service_1.default.buy(req.currentUser(), req.game(), req.body);

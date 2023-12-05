@@ -62,38 +62,77 @@ class BaseRepository {
         const query = { _id: id };
         return await this.deleteOne(currentUser, query);
     }
-    async getById(id, options = { lean: true }) {
+    async activateOne(currentUser, query = {}) {
+        const data = { isActive: true };
+        return await this.updateOne(currentUser, query, data);
+    }
+    async activateById(currentUser, id) {
+        const query = { _id: id };
+        return await this.activateOne(currentUser, query);
+    }
+    async deactivateOne(currentUser, query = {}) {
+        const data = { isActive: false };
+        return await this.updateOne(currentUser, query, data);
+    }
+    async deactivateById(currentUser, id) {
+        const query = { _id: id };
+        return await this.deactivateOne(currentUser, query);
+    }
+    async getById(id, options = {}) {
         const query = { _id: id };
         return await this.getOne(query, options);
     }
-    async getOne(query = {}, options = { lean: true }) {
+    async getActiveById(id, options = {}) {
+        const query = { _id: id, isActive: true };
+        return await this.getOne(query, options);
+    }
+    async getOne(query = {}, options = {}) {
         return await this.model
             .findOne(this.normalizeQuery(query))
-            .sort(options.sort)
+            .sort(options.sort || { createdAt: -1 })
             .populate(options.populate)
             .select(options.select || '')
             .lean(options.lean || true);
     }
-    async getMany(query = {}, options = { lean: true }) {
+    async getOneActive(query = {}, options = {}) {
+        query.isActive = true;
+        return await this.getOne(query, options);
+    }
+    async getMany(query = {}, options = {}) {
         const limit = Math.min(options.limit || 0, 100);
         const page = Math.max(options.page || 1, 1);
         const skip = (page - 1) * limit;
         return await this.model
             .find(this.normalizeQuery(query))
-            .sort(options.sort)
+            .sort(options.sort || { createdAt: -1 })
             .populate(options.populate)
             .skip(skip)
             .limit(limit)
             .select(options.select || '')
             .lean(options.lean || true);
     }
-    async getAll(query = {}, options = { lean: true }) {
+    async getManyActive(query = {}, options = {}) {
+        query.isActive = true;
+        return await this.getMany(query, options);
+    }
+    async getAll(query = {}, options = {}) {
         return await this.model
             .find(this.normalizeQuery(query))
-            .sort(options.sort)
+            .sort(options.sort || { createdAt: -1 })
             .populate(options.populate)
             .select(options.select || '')
             .lean(options.lean || true);
+    }
+    async getAllActive(query = {}, options = {}) {
+        query.isActive = true;
+        return await this.getAll(query, options);
+    }
+    async count(query = {}) {
+        return await this.model.countDocuments(this.normalizeQuery(query));
+    }
+    async countActive(query = {}) {
+        query.isActive = true;
+        return await this.count(query);
     }
 }
 exports.BaseRepository = BaseRepository;

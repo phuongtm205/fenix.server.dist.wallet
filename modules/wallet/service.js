@@ -48,6 +48,13 @@ class WalletService extends base_1.Service {
         return await this.getAccountInfoByTokens(account, tokens);
         ;
     }
+    async getPplBalance(currentUser, game) {
+        if (!currentUser.id)
+            return;
+        const pplToken = await service_1.default.getPplToken();
+        const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
+        return await helpers_1.RenecHelper.getTokenAccount(account.address, pplToken);
+    }
     async buy(currentUser, game, pkg) {
         if (!pkg || !pkg.price || pkg.price.renec <= 0)
             this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
