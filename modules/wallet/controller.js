@@ -43,9 +43,18 @@ class WalletController extends base_1.BaseController {
             res.error(err);
         }
     }
-    async claims(req, res) {
+    async claimsDailyReward(req, res) {
         try {
-            await service_1.default.claims(req.currentUser(), req.game(), req.body);
+            await service_1.default.claimsDailyReward(req.currentUser(), req.game(), req.body);
+            res.success();
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
+    async claimsReferralReward(req, res) {
+        try {
+            await service_1.default.claimsReferralReward(req.currentUser(), req.game(), req.body);
             res.success();
         }
         catch (err) {

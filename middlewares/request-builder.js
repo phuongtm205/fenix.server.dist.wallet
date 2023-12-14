@@ -9,6 +9,9 @@ class RequestBuilder {
                 res.json({ success: true, data });
             };
             res.error = (error = new common_1.FenixError()) => {
+                if (!(error instanceof common_1.FenixError)) {
+                    error = new common_1.FenixError(error);
+                }
                 next(error);
             };
             req.currentUser = () => {

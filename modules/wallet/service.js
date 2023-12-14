@@ -115,15 +115,16 @@ class WalletService extends base_1.Service {
             throw err;
         }
     }
-    async claims(currentUser, game, bonus) {
+    async claimsDailyReward(currentUser, game, bonus) {
         if (!bonus)
             this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
-        const transId = await service_3.default.startClaim(currentUser, { campaignId: bonus.campaignId, configId: bonus.configId, week: bonus.week, day: bonus.day });
+        const transId = await service_3.default.startClaimDailyReward(currentUser, { campaignId: bonus.campaignId, configId: bonus.configId, week: bonus.week, day: bonus.day });
         try {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
             const fenixPubkey = helpers_1.RenecHelper.getFenixPublicKey();
+            const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
             const dailyBonusKeypair = helpers_1.RenecHelper.getDailyBonusKeypair();
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             const transTokens = [];
@@ -150,11 +151,60 @@ class WalletService extends base_1.Service {
                 });
             }
             if (bonus.tokens.renec > 0) {
-                const signature = await helpers_1.RenecHelper.transferRenec(dailyBonusKeypair, userKeypair.publicKey, bonus.tokens.renec);
+                const signature = await helpers_1.RenecHelper.transferRenec(fenixKeypair, userKeypair.publicKey, bonus.tokens.renec);
                 transTokens.push({
                     signature,
                     code: constants_1.TOKEN_CODE.Renec,
                     amount: bonus.tokens.renec,
+                    beforeBalance: 0,
+                    afterBalance: 0,
+                });
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
+    async claimsReferralReward(currentUser, game, reward) {
+        if (!reward)
+            this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
+        const transId = await service_3.default.startClaimReferralReward(currentUser, { campaignId: reward.campaignId, configId: reward.configId, rewardId: reward.rewardId, numOfReferredFriends: reward.numOfReferredFriends });
+        try {
+            const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
+            if (!account)
+                this.throwError(constants_1.ERROR.Account.AccountNotFound);
+            const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
+            const dailyBonusKeypair = helpers_1.RenecHelper.getDailyBonusKeypair();
+            const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+            const transTokens = [];
+            const tokens = await service_1.default.getTokens();
+            if (reward.tokens.ppl > 0) {
+                const mint = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl).mint;
+                const signature = await helpers_1.RenecHelper.transferToken(dailyBonusKeypair, userKeypair.publicKey, mint, reward.tokens.ppl);
+                transTokens.push({
+                    signature,
+                    code: constants_1.TOKEN_CODE.Ppl,
+                    amount: reward.tokens.ppl,
+                    beforeBalance: 0,
+                    afterBalance: 0,
+                });
+            }
+            if (reward.tokens.renec > 0) {
+                const signature = await helpers_1.RenecHelper.transferRenec(fenixKeypair, userKeypair.publicKey, reward.tokens.renec);
+                transTokens.push({
+                    signature,
+                    code: constants_1.TOKEN_CODE.Renec,
+                    amount: reward.tokens.renec,
                     beforeBalance: 0,
                     afterBalance: 0,
                 });
