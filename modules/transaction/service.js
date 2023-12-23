@@ -6,52 +6,56 @@ const configs_1 = require("../../configs");
 const constants_1 = require("../../constants");
 const helpers_1 = require("../../helpers");
 class StatisticService extends base_1.Service {
-    async startBuy(currentUser, promotionPackage) {
+    async startBuy(currentUser, promotionPackage, body) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
             currentUser,
             data: {
                 type: constants_1.TRANSACTION_TYPE.Buy,
                 promotionPackage,
+                body,
             },
         });
         if (res.success)
             return res.data.id;
         this.throwError(res);
     }
-    async startClaimDailyReward(currentUser, dailyBonus) {
+    async startClaimDailyReward(currentUser, dailyBonus, body) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
             currentUser,
             data: {
                 type: constants_1.TRANSACTION_TYPE.ClaimDailyReward,
                 dailyBonus,
+                body,
             },
         });
         if (res.success)
             return res.data.id;
         this.throwError(res);
     }
-    async startClaimReferralReward(currentUser, referralReward) {
+    async startClaimReferralReward(currentUser, referralReward, body) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
             currentUser,
             data: {
                 type: constants_1.TRANSACTION_TYPE.ClaimReferralReward,
                 referralReward,
+                body,
             },
         });
         if (res.success)
             return res.data.id;
         this.throwError(res);
     }
-    async startWithdraw(currentUser, withdrawTo) {
+    async startWithdraw(currentUser, withdrawTo, body) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
             currentUser,
             data: {
                 type: constants_1.TRANSACTION_TYPE.Withdraw,
                 withdrawTo,
+                body,
             },
         });
         if (res.success)

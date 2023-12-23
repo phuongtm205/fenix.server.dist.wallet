@@ -58,7 +58,7 @@ class WalletService extends base_1.Service {
     async buy(currentUser, game, pkg) {
         if (!pkg || !pkg.price || pkg.price.renec <= 0)
             this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
-        const transId = await service_3.default.startBuy(currentUser, { campaignId: pkg.campaignId, promotionId: pkg.promotionId, packageId: pkg.packageId });
+        const transId = await service_3.default.startBuy(currentUser, { campaignId: pkg.campaignId, promotionId: pkg.promotionId, packageId: pkg.packageId }, pkg);
         try {
             // Check account
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
@@ -118,7 +118,7 @@ class WalletService extends base_1.Service {
     async claimsDailyReward(currentUser, game, bonus) {
         if (!bonus)
             this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
-        const transId = await service_3.default.startClaimDailyReward(currentUser, { campaignId: bonus.campaignId, configId: bonus.configId, week: bonus.week, day: bonus.day });
+        const transId = await service_3.default.startClaimDailyReward(currentUser, { campaignId: bonus.campaignId, configId: bonus.configId, week: bonus.week, day: bonus.day }, bonus);
         try {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
@@ -178,7 +178,7 @@ class WalletService extends base_1.Service {
     async claimsReferralReward(currentUser, game, reward) {
         if (!reward)
             this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
-        const transId = await service_3.default.startClaimReferralReward(currentUser, { campaignId: reward.campaignId, configId: reward.configId, rewardId: reward.rewardId, numOfReferredFriends: reward.numOfReferredFriends });
+        const transId = await service_3.default.startClaimReferralReward(currentUser, { campaignId: reward.campaignId, configId: reward.configId, rewardId: reward.rewardId, numOfReferredFriends: reward.numOfReferredFriends }, reward);
         try {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
@@ -227,7 +227,7 @@ class WalletService extends base_1.Service {
     async withdraw(currentUser, game, body) {
         if (!body || !body.address || !body.token || body.amount <= 0)
             return;
-        const transId = await service_3.default.startWithdraw(currentUser, body.address);
+        const transId = await service_3.default.startWithdraw(currentUser, body.address, body);
         try {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
