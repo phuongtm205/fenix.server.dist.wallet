@@ -35,10 +35,10 @@ exports.InsufficientBalance = {
 exports.InsufficientMinimumRenec = {
     code: 106,
     status: http_status_codes_1.StatusCodes.BAD_REQUEST,
-    message: 'The amount to withdraw must be greater than or equals to ',
+    message: 'The withdrawal amount must be greater than or equals to {amount} RENEC.',
 };
 exports.InsufficientMinimumPpl = {
     code: 107,
     status: http_status_codes_1.StatusCodes.BAD_REQUEST,
-    message: 'The amount to withdraw must be greater than or equals to ',
+    message: 'The withdrawal amount must be greater than or equals to {amount} PPL.',
 };

@@ -265,7 +265,7 @@ class WalletService extends base_1.Service {
     }
     async withdrawRenec(amount, userKeypair, toPubKey) {
         if (Number.parseFloat(amount.toString()) < configs_1.Env.MIN_RENEC_WITHDRAW) {
-            const message = constants_1.ERROR.Account.InsufficientMinimumRenec.message + configs_1.Env.MIN_RENEC_WITHDRAW + " RENEC.";
+            const message = constants_1.ERROR.Account.InsufficientMinimumRenec.message.replace("{amount}", configs_1.Env.MIN_RENEC_WITHDRAW.toString());
             this.throwError(constants_1.ERROR.Account.InsufficientMinimumRenec, message);
         }
         const minBalance = Number.parseFloat(amount.toString()) + configs_1.Env.MIN_RENEC_BALANCE;
@@ -287,7 +287,7 @@ class WalletService extends base_1.Service {
             this.throwError(constants_1.ERROR.Wallet.TokenNotFound);
         console.log(configs_1.Env.MIN_PPL_WITHDRAW);
         if (Number.parseFloat(amount.toString()) < configs_1.Env.MIN_PPL_WITHDRAW) {
-            const message = constants_1.ERROR.Account.InsufficientMinimumPpl.message + configs_1.Env.MIN_PPL_WITHDRAW + " PPL.";
+            const message = constants_1.ERROR.Account.InsufficientMinimumPpl.message.replace("{amount}", configs_1.Env.MIN_PPL_WITHDRAW.toString());
             this.throwError(constants_1.ERROR.Account.InsufficientMinimumPpl, message);
         }
         const minBalance = Number.parseFloat(amount.toString()) + configs_1.Env.MIN_PPL_BALANCE;
