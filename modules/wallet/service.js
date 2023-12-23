@@ -13,6 +13,7 @@ const web3_js_1 = require("@solana/web3.js");
 const configs_1 = require("../../configs");
 const common_1 = require("../../common");
 const service_3 = __importDefault(require("../transaction/service"));
+const number_1 = require("../../helpers/number");
 class WalletService extends base_1.Service {
     async getAccountInfoByTokens(acc, tokens = []) {
         const renec = await helpers_1.RenecHelper.getBalance(acc.address);
@@ -265,13 +266,17 @@ class WalletService extends base_1.Service {
     }
     async withdrawRenec(amount, userKeypair, toPubKey) {
         if (Number.parseFloat(amount.toString()) < configs_1.Env.MIN_RENEC_WITHDRAW) {
-            const message = constants_1.ERROR.Account.InsufficientMinimumRenec.message.replace("{amount}", configs_1.Env.MIN_RENEC_WITHDRAW.toString());
+            const message = constants_1.ERROR.Account.InsufficientMinimumRenec.message.replace('{amount}', configs_1.Env.MIN_RENEC_WITHDRAW.toString());
             this.throwError(constants_1.ERROR.Account.InsufficientMinimumRenec, message);
         }
-        const minBalance = Number.parseFloat(amount.toString()) + configs_1.Env.MIN_RENEC_BALANCE;
         const renecBalance = await helpers_1.RenecHelper.getBalance(userKeypair.publicKey);
-        if (renecBalance.amount < minBalance) {
-            this.throwError(constants_1.ERROR.Account.InsufficientBalance);
+        let maxAmount = number_1.NumberHelper.floor(renecBalance.amount - configs_1.Env.MIN_RENEC_BALANCE);
+        maxAmount = maxAmount < 0 ? 0 : maxAmount;
+        if (Number.parseFloat(amount.toString()) > maxAmount) {
+            const message = constants_1.ERROR.Account.InsufficientRenecBalance.message
+                .replace('{withdrawingAmount}', amount.toString())
+                .replace('{maximumAmount}', maxAmount.toString());
+            this.throwError(constants_1.ERROR.Account.InsufficientRenecBalance, message);
         }
         const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, toPubKey, amount);
         return {
@@ -290,10 +295,14 @@ class WalletService extends base_1.Service {
             const message = constants_1.ERROR.Account.InsufficientMinimumPpl.message.replace("{amount}", configs_1.Env.MIN_PPL_WITHDRAW.toString());
             this.throwError(constants_1.ERROR.Account.InsufficientMinimumPpl, message);
         }
-        const minBalance = Number.parseFloat(amount.toString()) + configs_1.Env.MIN_PPL_BALANCE;
-        const tokenBalance = await helpers_1.RenecHelper.getTokenAccount(userKeypair.publicKey, token);
-        if (tokenBalance.amount < minBalance) {
-            this.throwError(constants_1.ERROR.Account.InsufficientBalance);
+        const pplBalance = await helpers_1.RenecHelper.getTokenAccount(userKeypair.publicKey, token);
+        let maxAmount = number_1.NumberHelper.floor(pplBalance.amount - configs_1.Env.MIN_PPL_BALANCE);
+        maxAmount = maxAmount < 0 ? 0 : maxAmount;
+        if (Number.parseFloat(amount.toString()) > maxAmount) {
+            const message = constants_1.ERROR.Account.InsufficientPplBalance.message
+                .replace('{withdrawingAmount}', amount.toString())
+                .replace('{maximumAmount}', maxAmount.toString());
+            this.throwError(constants_1.ERROR.Account.InsufficientPplBalance, message);
         }
         const signature = await helpers_1.RenecHelper.transferToken(userKeypair, toPubKey, token.mint, amount);
         return {
