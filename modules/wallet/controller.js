@@ -34,9 +34,9 @@ class WalletController extends base_1.BaseController {
             res.error(err);
         }
     }
-    async buy(req, res) {
+    async buyPromotionPackage(req, res) {
         try {
-            await service_1.default.buy(req.currentUser(), req.game(), req.body);
+            await service_1.default.buyPromotionPackage(req.currentUser(), req.game(), req.body);
             res.success();
         }
         catch (err) {

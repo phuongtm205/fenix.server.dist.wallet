@@ -6,12 +6,12 @@ const configs_1 = require("../../configs");
 const constants_1 = require("../../constants");
 const helpers_1 = require("../../helpers");
 class StatisticService extends base_1.Service {
-    async startBuy(currentUser, promotionPackage, body) {
+    async startBuyPromotionPackage(currentUser, promotionPackage, body) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
             currentUser,
             data: {
-                type: constants_1.TRANSACTION_TYPE.Buy,
+                type: constants_1.TRANSACTION_TYPE.BuyPromotionPackage,
                 promotionPackage,
                 body,
             },

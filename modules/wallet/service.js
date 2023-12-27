@@ -56,10 +56,10 @@ class WalletService extends base_1.Service {
         const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
         return await helpers_1.RenecHelper.getTokenAccount(account.address, pplToken);
     }
-    async buy(currentUser, game, pkg) {
+    async buyPromotionPackage(currentUser, game, pkg) {
         if (!pkg || !pkg.price || pkg.price.renec <= 0)
             this.throwError(constants_1.ERROR.Wallet.PackageNotFound);
-        const transId = await service_3.default.startBuy(currentUser, { campaignId: pkg.campaignId, promotionId: pkg.promotionId, packageId: pkg.packageId }, pkg);
+        const transId = await service_3.default.startBuyPromotionPackage(currentUser, { campaignId: pkg.campaignId, promotionId: pkg.promotionId, packageId: pkg.packageId }, pkg);
         try {
             // Check account
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
