@@ -30,7 +30,7 @@ exports.AccountNotFound = {
 exports.InsufficientBalance = {
     code: 105,
     status: http_status_codes_1.StatusCodes.BAD_REQUEST,
-    message: 'Balance is insufficient',
+    message: 'Your RENEC balance is insufficient.',
 };
 exports.InsufficientRenecBalance = {
     code: 106,

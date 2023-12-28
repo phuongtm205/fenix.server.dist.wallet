@@ -130,6 +130,11 @@ class WalletService extends base_1.Service {
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             const transTokens = [];
             if (bonus.price && bonus.price.renec > 0) {
+                // Check balance
+                const userRenecBalance = await helpers_1.RenecHelper.getBalance(account.address);
+                if (userRenecBalance.amount < bonus.price.renec + configs_1.Env.MIN_RENEC_BALANCE) {
+                    this.throwError(constants_1.ERROR.Account.InsufficientBalance);
+                }
                 const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixPubkey, bonus.price.renec);
                 transTokens.push({
                     signature,
