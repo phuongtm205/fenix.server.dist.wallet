@@ -6,6 +6,15 @@ const configs_1 = require("../../configs");
 const constants_1 = require("../../constants");
 const helpers_1 = require("../../helpers");
 class StatisticService extends base_1.Service {
+    async getTransactionById(currentUser, transId) {
+        const res = await helpers_1.HttpHelper.get({
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions/${transId}`,
+            currentUser,
+        });
+        if (res.success)
+            return res.data;
+        this.throwError(res);
+    }
     async startBuyPromotionPackage(currentUser, promotionPackage, body) {
         const res = await helpers_1.HttpHelper.post({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
@@ -55,6 +64,45 @@ class StatisticService extends base_1.Service {
             data: {
                 type: constants_1.TRANSACTION_TYPE.Withdraw,
                 withdrawTo,
+                body,
+            },
+        });
+        if (res.success)
+            return res.data.id;
+        this.throwError(res);
+    }
+    async startBet(currentUser, body) {
+        const res = await helpers_1.HttpHelper.post({
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
+            currentUser,
+            data: {
+                type: constants_1.TRANSACTION_TYPE.Bet,
+                body,
+            },
+        });
+        if (res.success)
+            return res.data.id;
+        this.throwError(res);
+    }
+    async startRefundBet(currentUser, body) {
+        const res = await helpers_1.HttpHelper.post({
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
+            currentUser,
+            data: {
+                type: constants_1.TRANSACTION_TYPE.RefundBet,
+                body,
+            },
+        });
+        if (res.success)
+            return res.data.id;
+        this.throwError(res);
+    }
+    async startSplitReward(currentUser, body) {
+        const res = await helpers_1.HttpHelper.post({
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
+            currentUser,
+            data: {
+                type: constants_1.TRANSACTION_TYPE.SplitReward,
                 body,
             },
         });

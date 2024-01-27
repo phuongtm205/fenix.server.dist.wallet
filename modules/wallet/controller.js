@@ -70,6 +70,33 @@ class WalletController extends base_1.BaseController {
             res.error(err);
         }
     }
+    async bet(req, res) {
+        try {
+            const transId = await service_1.default.bet(req.currentUser(), req.game(), req.body);
+            res.success({ transId });
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
+    async refundBet(req, res) {
+        try {
+            const transId = await service_1.default.refundBet(req.currentUser(), req.game(), req.body);
+            res.success({ transId });
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
+    async splitReward(req, res) {
+        try {
+            const transId = await service_1.default.splitReward(req.currentUser(), req.game(), req.body);
+            res.success({ transId });
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
 }
 exports.WalletController = WalletController;
 exports.default = new WalletController();

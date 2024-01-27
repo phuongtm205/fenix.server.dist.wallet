@@ -7,4 +7,7 @@ exports.TRANSACTION_TYPE = {
     ClaimReferralReward: 'claim-referral-reward',
     Deposit: 'deposit',
     Withdraw: 'withdraw',
+    Bet: 'bet',
+    RefundBet: 'refund-bet',
+    SplitReward: 'split-reward',
 };

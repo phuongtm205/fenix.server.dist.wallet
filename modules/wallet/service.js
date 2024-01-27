@@ -65,7 +65,7 @@ class WalletService extends base_1.Service {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
-            const fenixPubkey = helpers_1.RenecHelper.getFenixPublicKey();
+            const receivedPubkey = helpers_1.RenecHelper.getReceivedRenecOnlyPublicKey();
             const shopKeypair = helpers_1.RenecHelper.getShopKeypair();
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             // Check balance
@@ -81,7 +81,7 @@ class WalletService extends base_1.Service {
                 }
             }
             const transTokens = [];
-            const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixPubkey, pkg.price.renec);
+            const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, receivedPubkey, pkg.price.renec);
             transTokens.push({
                 signature,
                 code: constants_1.TOKEN_CODE.Renec,
@@ -124,7 +124,7 @@ class WalletService extends base_1.Service {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
-            const fenixPubkey = helpers_1.RenecHelper.getFenixPublicKey();
+            const receivedPubkey = helpers_1.RenecHelper.getReceivedRenecOnlyPublicKey();
             const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
             const dailyBonusKeypair = helpers_1.RenecHelper.getDailyBonusKeypair();
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
@@ -135,7 +135,7 @@ class WalletService extends base_1.Service {
                 if (userRenecBalance.amount < bonus.price.renec + configs_1.Env.MIN_RENEC_BALANCE) {
                     this.throwError(constants_1.ERROR.Account.InsufficientBalance);
                 }
-                const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, fenixPubkey, bonus.price.renec);
+                const signature = await helpers_1.RenecHelper.transferRenec(userKeypair, receivedPubkey, bonus.price.renec);
                 transTokens.push({
                     signature,
                     code: constants_1.TOKEN_CODE.Renec,
@@ -253,6 +253,124 @@ class WalletService extends base_1.Service {
                     transTokens.push(trans1);
                 const trans2 = await this.withdrawPpl(body.amount, token, userKeypair, toPubKey);
                 transTokens.push(trans2);
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
+    async bet(currentUser, game, body) {
+        if (!body || !body.token || body.amount <= 0)
+            this.throwError(constants_1.ERROR.Wallet.InvalidBody);
+        const transId = await service_3.default.startBet(currentUser, body);
+        try {
+            const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
+            if (!account)
+                this.throwError(constants_1.ERROR.Account.AccountNotFound);
+            const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+            const betPubkey = helpers_1.RenecHelper.getFenixKeypair().publicKey;
+            const transTokens = [];
+            if (body.token == constants_1.TOKEN_CODE.Renec) {
+                const transToken = await this.withdrawRenec(body.amount, userKeypair, betPubkey);
+                transTokens.push(transToken);
+            }
+            const tokens = await service_1.default.getTokens();
+            if (body.token == constants_1.TOKEN_CODE.Ppl) {
+                const token = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl);
+                const trans1 = await this.addMinimumRenec(userKeypair.publicKey);
+                if (trans1)
+                    transTokens.push(trans1);
+                const trans2 = await this.withdrawPpl(body.amount, token, userKeypair, betPubkey);
+                transTokens.push(trans2);
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+            return transId;
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
+    async refundBet(currentUser, game, body) {
+        if (!body || !body.transId)
+            return;
+        const transId = await service_3.default.startRefundBet(currentUser, body);
+        if (!transId)
+            this.throwError(constants_1.ERROR.Wallet.BetRefunded);
+        try {
+            const trans = await service_3.default.getTransactionById(currentUser, body.transId);
+            const betBody = trans.body;
+            const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
+            if (!account)
+                this.throwError(constants_1.ERROR.Account.AccountNotFound);
+            const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+            const betKeypair = helpers_1.RenecHelper.getFenixKeypair();
+            const transTokens = [];
+            if (betBody.token == constants_1.TOKEN_CODE.Renec) {
+                const transToken = await this.withdrawRenec(betBody.amount, betKeypair, userKeypair.publicKey);
+                transTokens.push(transToken);
+            }
+            const tokens = await service_1.default.getTokens();
+            if (betBody.token == constants_1.TOKEN_CODE.Ppl) {
+                const token = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl);
+                const transPpl = await this.withdrawPpl(betBody.amount, token, betKeypair, userKeypair.publicKey);
+                transTokens.push(transPpl);
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
+    async splitReward(currentUser, game, body) {
+        if (!body || !body.rewards || body.rewards.length == 0)
+            this.throwError(constants_1.ERROR.Wallet.RewardNotFound);
+        const transId = await service_3.default.startSplitReward(currentUser, body);
+        try {
+            const transTokens = [];
+            for (var reward of body.rewards) {
+                const account = await service_2.default.getAccountByUserIdAndGame(reward.userId, game.name);
+                if (!account)
+                    continue;
+                const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+                const betKeypair = helpers_1.RenecHelper.getFenixKeypair();
+                if (reward.token == constants_1.TOKEN_CODE.Renec) {
+                    const transToken = await this.withdrawRenec(reward.amount, betKeypair, userKeypair.publicKey);
+                    transTokens.push(transToken);
+                }
+                const tokens = await service_1.default.getTokens();
+                if (reward.token == constants_1.TOKEN_CODE.Ppl) {
+                    const token = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl);
+                    const transPpl = await this.withdrawPpl(reward.amount, token, betKeypair, userKeypair.publicKey);
+                    transTokens.push(transPpl);
+                }
             }
             await service_3.default.updateSuccess(currentUser, transId, transTokens);
         }

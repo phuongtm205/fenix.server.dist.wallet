@@ -19,7 +19,7 @@ class RenecHelper {
     static getFenixKeypair() {
         return crypto_1.CryptoHelper.generateKeypairFromSecretKey(configs_1.Env.FENIX_SECRET_KEY);
     }
-    static getFenixPublicKey() {
+    static getReceivedRenecOnlyPublicKey() {
         return new web3_js_1.PublicKey(configs_1.Env.FENIX_PUBLIC_KEY);
     }
     static async createAccount(secretPhrase, accountIndex) {

@@ -16,6 +16,9 @@ class WalletRouter extends base_1.BaseRouter {
         router.post('/claims-daily-reward', middlewares_1.Auth.authorize, controller_1.default.claimsDailyReward);
         router.post('/claims-referral-reward', middlewares_1.Auth.authorize, controller_1.default.claimsReferralReward);
         router.post('/withdraw', middlewares_1.Auth.authorize, controller_1.default.withdraw);
+        router.post('/bet', middlewares_1.Auth.authorize, controller_1.default.bet);
+        router.post('/refund-bet', middlewares_1.Auth.authorize, controller_1.default.refundBet);
+        router.post('/split-reward', middlewares_1.Auth.authorizeSystem, controller_1.default.splitReward);
     }
 }
 exports.WalletRouter = WalletRouter;
