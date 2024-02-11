@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RenecHelper = void 0;
 const web3_js_1 = require("@solana/web3.js");
@@ -6,6 +9,7 @@ const configs_1 = require("../configs");
 const crypto_1 = require("./crypto");
 const spl_token_1 = require("@solana/spl-token");
 const common_1 = require("../common");
+const bs58_1 = __importDefault(require("bs58"));
 class RenecHelper {
     static getConnection() {
         return new web3_js_1.Connection(configs_1.Env.RENEC_CONNECTION, 'confirmed');
@@ -29,6 +33,7 @@ class RenecHelper {
         console.log(accountIndex);
         console.log(newKeypair.secretKey.toString());
         console.log(newKeypair.publicKey.toString());
+        console.log(bs58_1.default.encode(newKeypair.secretKey));
         const createAccountParams = {
             fromPubkey: fromKeypair.publicKey,
             newAccountPubkey: newKeypair.publicKey,
