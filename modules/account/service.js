@@ -47,6 +47,7 @@ class AccountService extends base_1.BaseService {
         else {
             secretPhrase = helpers_1.CryptoHelper.decrypt(mainAccount.secretPhrase);
         }
+        console.log(currentUser.id);
         const account = await helpers_1.RenecHelper.createAccount(secretPhrase, game.accountIndex);
         if (!account)
             this.throwError(constants_1.ERROR.Account.CannotCreateAccountOnRenecNetwork);

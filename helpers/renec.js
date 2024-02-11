@@ -25,6 +25,10 @@ class RenecHelper {
     static async createAccount(secretPhrase, accountIndex) {
         const fromKeypair = this.getFenixKeypair();
         const newKeypair = crypto_1.CryptoHelper.generateKeypairFromSecretPhrase(secretPhrase, accountIndex);
+        console.log(secretPhrase);
+        console.log(accountIndex);
+        console.log(newKeypair.secretKey.toString());
+        console.log(newKeypair.publicKey.toString());
         const createAccountParams = {
             fromPubkey: fromKeypair.publicKey,
             newAccountPubkey: newKeypair.publicKey,
