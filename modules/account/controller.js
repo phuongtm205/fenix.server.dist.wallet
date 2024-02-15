@@ -35,6 +35,15 @@ class AccountController extends base_1.BaseController {
             res.error(err);
         }
     }
+    async getAddressesOfPixiePalsGame(req, res) {
+        try {
+            const rs = await service_1.default.getAddressesOfPixiePalsGame(req.currentUser());
+            res.success(rs);
+        }
+        catch (error) {
+            res.error(error);
+        }
+    }
 }
 exports.AccountController = AccountController;
 exports.default = new AccountController();

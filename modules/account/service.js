@@ -68,6 +68,13 @@ class AccountService extends base_1.BaseService {
             return;
         return accounts.map((acc) => acc.address);
     }
+    async getAddressesOfPixiePalsGame(currentUser) {
+        const accounts = await repository_1.default.getAll({ userId: currentUser.id }, { select: 'address name' });
+        if (!accounts || accounts.length == 0)
+            return;
+        const account = accounts.find((acc) => acc.name === 'Pixie Pals Account');
+        return account;
+    }
     async getAccountByAddress(address) {
         return await repository_1.default.getOne({ address }, { select: 'secretPhrase index' });
     }

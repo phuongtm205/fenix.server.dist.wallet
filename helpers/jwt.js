@@ -7,8 +7,13 @@ exports.JwtHelper = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const configs_1 = require("../configs");
 class JwtHelper {
-    static sign(data, expiresIn = '24h') {
-        return jsonwebtoken_1.default.sign(data, configs_1.Env.JWT_KEY, { expiresIn });
+    static generateToken(data, options = {}) {
+        const defaultOptions = {
+            // algorithm: 'RS256',
+            expiresIn: '24h',
+        };
+        const newOptions = { ...defaultOptions, ...options };
+        return jsonwebtoken_1.default.sign(data, configs_1.Env.JWT_KEY, newOptions);
     }
     static verify(token) {
         try {

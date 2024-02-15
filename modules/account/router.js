@@ -12,6 +12,7 @@ class AccountRouter extends base_1.BaseRouter {
         router.post('/main', middlewares_1.Auth.authorize, controller_1.default.createMainAccount);
         router.post('/game', middlewares_1.Auth.authorize, controller_1.default.createGameAccount);
         router.get('/addresses', middlewares_1.Auth.authorize, controller_1.default.getAddressesByUser);
+        router.get('/addresses/pixie-pals-game', middlewares_1.Auth.authorize, controller_1.default.getAddressesOfPixiePalsGame);
     }
 }
 exports.AccountRouter = AccountRouter;
