@@ -22,4 +22,5 @@ exports.Env = {
     MIN_RENEC_WITHDRAW: Number.parseFloat(process.env.MIN_RENEC_WITHDRAW || '0.01'),
     MIN_PPL_WITHDRAW: Number.parseFloat(process.env.MIN_PPL_WITHDRAW || '1'),
     STATISTIC_HOST: process.env.STATISTIC_HOST || 'http://localhost:3030',
+    JWT_KEY: process.env.JWT_KEY || 'WLhOBtRW47vhtzNdr5j1qIavrr8HeWAw4V0NQlVqVdnku9gRtB',
 };
