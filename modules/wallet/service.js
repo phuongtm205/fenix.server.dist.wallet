@@ -124,9 +124,9 @@ class WalletService extends base_1.Service {
             const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
             if (!account)
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
-            const receivedPubkey = helpers_1.RenecHelper.getReceivedRenecOnlyPublicKey();
-            const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
-            const dailyBonusKeypair = helpers_1.RenecHelper.getDailyBonusKeypair();
+            const receivedPubkey = helpers_1.RenecHelper.getReceivedRenecOnlyPublicKey(); // vi nhan renec
+            const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair(); // vi cho renec
+            const dailyBonusKeypair = helpers_1.RenecHelper.getDailyBonusKeypair(); // vi cho ppl
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             const transTokens = [];
             if (bonus.price && bonus.price.renec > 0) {
@@ -371,6 +371,82 @@ class WalletService extends base_1.Service {
                     const transPpl = await this.withdrawPpl(reward.amount, token, betKeypair, userKeypair.publicKey);
                     transTokens.push(transPpl);
                 }
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
+    async shareFacebook(currentUser, game, body) {
+        if (!body)
+            return;
+        const transId = await service_3.default.startShareFacebook(currentUser, body);
+        try {
+            const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
+            if (!account)
+                this.throwError(constants_1.ERROR.Account.AccountNotFound);
+            const keypairReceivedPpl = helpers_1.RenecHelper.getDailyBonusKeypair();
+            const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+            const transTokens = [];
+            const tokens = await service_1.default.getTokens();
+            if (body.tokens.ppl > 0) {
+                const mint = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl).mint;
+                const signature = await helpers_1.RenecHelper.transferToken(keypairReceivedPpl, userKeypair.publicKey, mint, body.tokens.ppl);
+                transTokens.push({
+                    signature,
+                    code: constants_1.TOKEN_CODE.Ppl,
+                    amount: body.tokens.ppl,
+                    beforeBalance: 0,
+                    afterBalance: 0,
+                });
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
+    async refer(currentUser, game, body) {
+        if (!body)
+            return;
+        const transId = await service_3.default.startRefer(currentUser, body);
+        try {
+            const account = await service_2.default.getAccountByUserIdAndGame(currentUser.id, game.name);
+            if (!account)
+                this.throwError(constants_1.ERROR.Account.AccountNotFound);
+            const keypairReceivedPpl = helpers_1.RenecHelper.getDailyBonusKeypair();
+            const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+            const transTokens = [];
+            const tokens = await service_1.default.getTokens();
+            if (body.tokens.ppl > 0) {
+                const mint = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl).mint;
+                const signature = await helpers_1.RenecHelper.transferToken(keypairReceivedPpl, userKeypair.publicKey, mint, body.tokens.ppl);
+                transTokens.push({
+                    signature,
+                    code: constants_1.TOKEN_CODE.Ppl,
+                    amount: body.tokens.ppl,
+                    beforeBalance: 0,
+                    afterBalance: 0,
+                });
             }
             await service_3.default.updateSuccess(currentUser, transId, transTokens);
         }

@@ -10,4 +10,6 @@ exports.TRANSACTION_TYPE = {
     Bet: 'bet',
     RefundBet: 'refund-bet',
     SplitReward: 'split-reward',
+    ShareFacebook: 'share-facebook',
+    Refer: 'refer',
 };

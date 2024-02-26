@@ -97,6 +97,24 @@ class WalletController extends base_1.BaseController {
             res.error(err);
         }
     }
+    async shareFacebook(req, res) {
+        try {
+            await service_1.default.shareFacebook(req.currentUser(), req.game(), req.body);
+            res.success([]);
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
+    async refer(req, res) {
+        try {
+            await service_1.default.refer(req.currentUser(), req.game(), req.body);
+            res.success([]);
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
 }
 exports.WalletController = WalletController;
 exports.default = new WalletController();

@@ -110,6 +110,32 @@ class StatisticService extends base_1.Service {
             return res.data.id;
         this.throwError(res);
     }
+    async startShareFacebook(currentUser, body) {
+        const res = await helpers_1.HttpHelper.post({
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
+            currentUser,
+            data: {
+                type: constants_1.TRANSACTION_TYPE.ShareFacebook,
+                body,
+            },
+        });
+        if (res.success)
+            return res.data.id;
+        this.throwError(res);
+    }
+    async startRefer(currentUser, body) {
+        const res = await helpers_1.HttpHelper.post({
+            url: `${configs_1.Env.STATISTIC_HOST}/transactions`,
+            currentUser,
+            data: {
+                type: constants_1.TRANSACTION_TYPE.Refer,
+                body,
+            },
+        });
+        if (res.success)
+            return res.data.id;
+        this.throwError(res);
+    }
     async updateSuccess(currentUser, transId, tokens) {
         const res = await helpers_1.HttpHelper.put({
             url: `${configs_1.Env.STATISTIC_HOST}/transactions/${transId}/success`,
