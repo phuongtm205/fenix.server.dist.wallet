@@ -514,7 +514,7 @@ class WalletService extends base_1.Service {
     }
     async addMinimumRenec(toPubKey) {
         const renec = await helpers_1.RenecHelper.getBalance(toPubKey);
-        if (renec.amount > 0)
+        if (renec.amount > 0.00095)
             return;
         const fenixKeypair = helpers_1.RenecHelper.getFenixKeypair();
         const signature = await helpers_1.RenecHelper.transferRenec(fenixKeypair, toPubKey, constants_1.MIN_RENEC);
