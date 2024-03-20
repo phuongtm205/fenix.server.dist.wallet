@@ -18,7 +18,7 @@ class WalletRouter extends base_1.BaseRouter {
         router.post('/withdraw', middlewares_1.Auth.authorize, controller_1.default.withdraw);
         router.post('/bet', middlewares_1.Auth.authorize, controller_1.default.bet);
         router.post('/refund-bet', middlewares_1.Auth.authorize, controller_1.default.refundBet);
-        router.post('/split-reward', middlewares_1.Auth.authorizeSystem, controller_1.default.splitReward);
+        router.post('/split-reward', middlewares_1.Auth.authorize, controller_1.default.splitReward);
         router.post('/share-facebook', middlewares_1.Auth.authorize, controller_1.default.shareFacebook);
         router.post('/referred-friends', middlewares_1.Auth.authorize, controller_1.default.refer);
     }
