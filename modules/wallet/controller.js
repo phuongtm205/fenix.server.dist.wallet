@@ -97,6 +97,15 @@ class WalletController extends base_1.BaseController {
             res.error(err);
         }
     }
+    async receivePoolReward(req, res) {
+        try {
+            const transId = await service_1.default.receivePoolReward(req.currentUser(), req.game(), req.body);
+            res.success({ transId });
+        }
+        catch (err) {
+            res.error(err);
+        }
+    }
     async shareFacebook(req, res) {
         try {
             await service_1.default.shareFacebook(req.currentUser(), req.game(), req.body);

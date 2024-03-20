@@ -12,4 +12,5 @@ exports.TRANSACTION_TYPE = {
     SplitReward: 'split-reward',
     ShareFacebook: 'share-facebook',
     Refer: 'refer',
+    ReceivePoolReward: 'receive-pool-reward',
 };

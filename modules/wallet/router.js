@@ -21,6 +21,7 @@ class WalletRouter extends base_1.BaseRouter {
         router.post('/split-reward', middlewares_1.Auth.authorize, controller_1.default.splitReward);
         router.post('/share-facebook', middlewares_1.Auth.authorize, controller_1.default.shareFacebook);
         router.post('/referred-friends', middlewares_1.Auth.authorize, controller_1.default.refer);
+        router.post('/receive-pool-reward', middlewares_1.Auth.authorize, controller_1.default.receivePoolReward);
     }
 }
 exports.WalletRouter = WalletRouter;

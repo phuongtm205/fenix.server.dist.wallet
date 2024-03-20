@@ -387,6 +387,42 @@ class WalletService extends base_1.Service {
             throw err;
         }
     }
+    async receivePoolReward(currentUser, game, reward) {
+        if (!reward || !reward.userId)
+            this.throwError(constants_1.ERROR.Wallet.RewardNotFound);
+        const transId = await service_3.default.startReceivePoolReward(currentUser, reward);
+        try {
+            const transTokens = [];
+            const account = await service_2.default.getAccountByUserIdAndGame(reward.userId, game.name);
+            if (!account)
+                this.throwError(constants_1.ERROR.Account.AccountNotFound);
+            const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
+            const betKeypair = helpers_1.RenecHelper.getFenixKeypair();
+            if (reward.renec && reward.renec > 0) {
+                const transToken = await this.withdrawRenec(reward.renec, betKeypair, userKeypair.publicKey);
+                transTokens.push(transToken);
+            }
+            const tokens = await service_1.default.getTokens();
+            if (reward.ppl && reward.ppl > 0) {
+                const token = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl);
+                const transPpl = await this.withdrawPpl(reward.ppl, token, betKeypair, userKeypair.publicKey);
+                transTokens.push(transPpl);
+            }
+            await service_3.default.updateSuccess(currentUser, transId, transTokens);
+        }
+        catch (err) {
+            if (err instanceof common_1.FenixError) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else if (err instanceof Error) {
+                await service_3.default.updateFailed(currentUser, transId, err.message);
+            }
+            else {
+                await service_3.default.updateFailed(currentUser, transId, constants_1.ERROR.System.Unknown.message);
+            }
+            throw err;
+        }
+    }
     async shareFacebook(currentUser, game, body) {
         if (!body)
             return;
