@@ -398,15 +398,15 @@ class WalletService extends base_1.Service {
                 this.throwError(constants_1.ERROR.Account.AccountNotFound);
             const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
             const betKeypair = helpers_1.RenecHelper.getFenixKeypair();
-            if (reward.renec && reward.renec > 0) {
-                const transToken = await this.withdrawRenec(reward.renec, betKeypair, userKeypair.publicKey);
-                transTokens.push(transToken);
-            }
             const tokens = await service_1.default.getTokens();
             if (reward.ppl && reward.ppl > 0) {
                 const token = tokens.find(t => t.code == constants_1.TOKEN_CODE.Ppl);
                 const transPpl = await this.withdrawPpl(reward.ppl, token, betKeypair, userKeypair.publicKey);
                 transTokens.push(transPpl);
+            }
+            if (reward.renec && reward.renec > 0) {
+                const transToken = await this.withdrawRenec(reward.renec, betKeypair, userKeypair.publicKey);
+                transTokens.push(transToken);
             }
             await service_3.default.updateSuccess(currentUser, transId, transTokens);
         }
