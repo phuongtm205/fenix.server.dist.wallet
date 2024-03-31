@@ -16,6 +16,8 @@ const service_3 = __importDefault(require("../transaction/service"));
 const number_1 = require("../../helpers/number");
 class WalletService extends base_1.Service {
     async getAccountInfoByTokens(acc, tokens = []) {
+        if (!acc)
+            return;
         const renec = await helpers_1.RenecHelper.getBalance(acc.address);
         const tokenAccounts = [];
         for (let token of tokens) {
@@ -360,7 +362,7 @@ class WalletService extends base_1.Service {
                 if (!account)
                     continue;
                 const userKeypair = helpers_1.CryptoHelper.generateKeypairFromEncryptedSecretPhrase(account.secretPhrase, account.index);
-                const betKeypair = helpers_1.RenecHelper.getFenixKeypair();
+                const betKeypair = helpers_1.RenecHelper.getFenixKeypair(); // vi cho renec
                 if (reward.token == constants_1.TOKEN_CODE.Renec) {
                     const transToken = await this.withdrawRenec(reward.amount, betKeypair, userKeypair.publicKey);
                     transTokens.push(transToken);
